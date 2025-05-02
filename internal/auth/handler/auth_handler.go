@@ -3,7 +3,10 @@ package handler
 import (
 	"fmt"
 	"main/configs"
+	"main/internal/auth/dto"
 	"main/internal/middleware"
+	"main/pkg/request"
+	"main/pkg/response"
 	"net/http"
 )
 
@@ -14,39 +17,27 @@ type AuthHandler struct {
 	*configs.Config
 }
 
-// Registration godoc
-// @Summary Регистрация пользователя
-// @Description Создаёт нового пользователя
-// @Tags auth
-// @Accept  json
-// @Produce  json
-// @Param request body RegistrationRequest true "Данные для регистрации"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 405 {object} map[string]string
-// @Router /auth/registration [post]
 func (h *AuthHandler) Registration(w http.ResponseWriter, r *http.Request) {
 	if !middleware.AllowMethod(w, r, http.MethodPost) {
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	_, err := fmt.Fprintln(w, "Registration OK")
-
+	_, err := request.HandleBody[dto.LoginRequest](w, r)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
+	var responseRegistration dto.RegisterResponse
+	response.Json(w, responseRegistration, http.StatusCreated)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if !middleware.AllowMethod(w, r, http.MethodPost) {
 		return
 	}
-	fmt.Println(h.Auth.Secret)
-	w.WriteHeader(http.StatusOK)
-	_, err := fmt.Fprintln(w, "Login OK")
+	body, err := request.HandleBody[dto.LoginRequest](w, r)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
+	fmt.Println(body)
 }
 
 func NewAuthHandler(router *http.ServeMux, impl AuthHandlerImpl) {
