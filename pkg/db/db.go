@@ -1,10 +1,9 @@
 package db
 
 import (
-	"go/adv-demo/configs"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"main/configs"
 )
 
 type Db struct {
